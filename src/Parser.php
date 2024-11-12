@@ -87,12 +87,9 @@ class Parser
         $this->lexer->setInput($input);
         $this->lexer->moveNext();
 
-        $node = null;
-        if ($this->mode->equals(Mode::FILTER)) {
-            $node = $this->disjunction();
-        } else {
-            $node = $this->path();
-        }
+        $node = $this->mode->equals(Mode::FILTER)
+            ? $this->disjunction()
+            : $this->path();
 
         $this->match(null);
 
@@ -107,6 +104,7 @@ class Parser
         if ($this->isValuePathIncoming()) {
             $valuePath = $this->valuePath();
             $attributePath = null;
+
             if ($this->lexer->isNextToken(Tokens::T_DOT)) {
                 $this->match(Tokens::T_DOT);
                 $attributePath = $this->attributePath();
@@ -129,6 +127,7 @@ class Parser
 
         if ($this->lexer->isNextToken(Tokens::T_SP)) {
             $nextToken = $this->lexer->glimpse();
+
             if ($this->isName('or', $nextToken)) {
                 $this->match(Tokens::T_SP);
                 $this->match(Tokens::T_NAME);
@@ -154,6 +153,7 @@ class Parser
 
         if ($this->lexer->isNextToken(Tokens::T_SP)) {
             $nextToken = $this->lexer->glimpse();
+            
             if ($this->isName('and', $nextToken)) {
                 $this->match(Tokens::T_SP);
                 $this->match(Tokens::T_NAME);
@@ -376,6 +376,7 @@ class Parser
         if (null === $token) {
             $token = $this->lexer->getLookahead();
         }
+        
         if ($token) {
             $offset = $token->getOffset();
         } elseif ($this->lexer->getToken()) {
