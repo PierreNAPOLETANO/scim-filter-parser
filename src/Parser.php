@@ -87,16 +87,9 @@ class Parser
         $this->lexer->setInput($input);
         $this->lexer->moveNext();
 
-        $node = null;
-        if ($this->mode->equals(Mode::FILTER)) {
-            $node = $this->disjunction();
-        } else {
-            $node = $this->path();
-        }
-
         $this->match(null);
 
-        return $node;
+        return $this->mode->equals(Mode::FILTER) ? $this->disjunction() : $this->path();
     }
 
     /**
@@ -179,17 +172,15 @@ class Parser
             $this->match(Tokens::T_NAME);
             $this->match(Tokens::T_SP);
             $this->match(Tokens::T_PAREN_OPEN);
-            $filter = $this->disjunction();
             $this->match(Tokens::T_PAREN_CLOSE);
 
-            return new Ast\Negation($filter);
+            return new Ast\Negation($this->disjunction());
         } elseif ($this->lexer->isNextToken(Tokens::T_PAREN_OPEN)) {
             // ( filter )
             $this->match(Tokens::T_PAREN_OPEN);
-            $filter = $this->disjunction();
             $this->match(Tokens::T_PAREN_CLOSE);
 
-            return $filter;
+            return $this->disjunction();
         }
 
         if ($this->version->equals(Version::V2()) && !$this->inValuePath) {
